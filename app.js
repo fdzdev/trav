@@ -250,16 +250,42 @@ function generateBidPDF(data) {
 
   const doc = new PDF('p', 'pt', 'letter');
   const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
   const rightCol = pageW - margin;
-  let y = 40;
+  let y = 30;
+
+  // ── Logo + Company Info Header
+  if (typeof LOGO_BASE64 !== 'undefined' && LOGO_BASE64) {
+    try {
+      doc.addImage('data:image/png;base64,' + LOGO_BASE64, 'PNG', margin, y, 150, 50);
+    } catch (e) { /* skip if image fails */ }
+  }
+
+  const infoX = pageW - margin;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text('974 ID-39, Blackfoot, ID 83221', infoX, y + 14, { align: 'right' });
+  doc.text('(208) 684-9333', infoX, y + 26, { align: 'right' });
+  doc.setTextColor(0);
+
+  y += 60;
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.text('Bid Estimate', pageW / 2, y, { align: 'center' });
-  y += 30;
+  y += 28;
 
-  // Header
+  // ── Thin accent line under title
+  doc.setDrawColor(230, 165, 0);
+  doc.setLineWidth(2);
+  doc.line(pageW / 2 - 60, y, pageW / 2 + 60, y);
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  y += 18;
+
+  // Header fields
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Customer:', margin, y);
@@ -398,13 +424,30 @@ function generateBidPDF(data) {
     y += noteLines.length * 14;
   }
 
-  // ── Footer
+  // ── Footer: deposit notice
   y += 20;
   divider();
   y += 12;
   doc.setFont('helvetica', 'bolditalic');
   doc.setFontSize(10);
   doc.text('50% deposit required to start — Balance due on pickup', pageW / 2, y, { align: 'center' });
+
+  // ── QR Code at bottom-left
+  const qrSize = 90;
+  const qrX = margin;
+  const qrY = pageH - margin - qrSize - 14;
+
+  if (typeof QR_BASE64 !== 'undefined' && QR_BASE64) {
+    try {
+      doc.addImage('data:image/png;base64,' + QR_BASE64, 'PNG', qrX, qrY, qrSize, qrSize);
+    } catch (e) { /* skip if image fails */ }
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text('Leave us a review!', qrX + qrSize / 2, qrY + qrSize + 12, { align: 'center' });
+  doc.setTextColor(0);
 
   return doc;
 }
