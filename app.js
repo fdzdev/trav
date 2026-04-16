@@ -253,6 +253,7 @@ function generateBidPDF(data) {
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
   const rightCol = pageW - margin;
+  const priceCol = pageW * 0.72;
   let y = 30;
 
   // ── Logo + Company Info Header
@@ -326,7 +327,7 @@ function generateBidPDF(data) {
     doc.setFont('helvetica', 'normal');
     doc.text(label, margin + 8, y);
     if (price) {
-      doc.text('$' + price, rightCol, y, { align: 'right' });
+      doc.text('$' + price, priceCol, y, { align: 'right' });
     }
     y += 16;
   }
@@ -338,7 +339,7 @@ function generateBidPDF(data) {
     const choice = val || '—';
     doc.text(choice, pageW / 2, y, { align: 'center' });
     if (price) {
-      doc.text('$' + price, rightCol, y, { align: 'right' });
+      doc.text('$' + price, priceCol, y, { align: 'right' });
     }
     y += 16;
   }
@@ -348,7 +349,7 @@ function generateBidPDF(data) {
     doc.setFont('helvetica', 'normal');
     doc.text(label, margin + 8, y);
     if (qty) doc.text('x' + qty, pageW / 2 - 30, y, { align: 'right' });
-    if (price) doc.text('$' + price + ' ea', rightCol, y, { align: 'right' });
+    if (price) doc.text('$' + price + ' ea', priceCol, y, { align: 'right' });
     y += 16;
   }
 
@@ -356,7 +357,7 @@ function generateBidPDF(data) {
   sectionTitle('Base Pricing');
   doc.setFont('helvetica', 'bold');
   doc.text('Item', margin + 8, y);
-  doc.text('Cost', rightCol, y, { align: 'right' });
+  doc.text('Cost', priceCol, y, { align: 'right' });
   y += 14;
   priceLine('Basic 4500 System', data.price_4500);
   priceLine('Full Installation', data.price_install);
@@ -379,7 +380,7 @@ function generateBidPDF(data) {
   doc.setFont('helvetica', 'bold');
   doc.text('Item', margin + 8, y);
   doc.text('Qty', pageW / 2 - 30, y, { align: 'right' });
-  doc.text('Cost ea.', rightCol, y, { align: 'right' });
+  doc.text('Cost ea.', priceCol, y, { align: 'right' });
   y += 14;
   qtyLine('Bows', data.bows_qty, data.bows_price);
   qtyLine('Latch Plate', data.latch_qty, data.latch_price);
