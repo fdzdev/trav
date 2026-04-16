@@ -441,16 +441,13 @@ function generateBidPDF(data) {
   doc.text('Leave us a review!', qrX + qrSize / 2, qrY + qrSize + 12, { align: 'center' });
   doc.setTextColor(0);
 
-  // ── Footer: deposit notice (line stops before QR)
-  y += 20;
-  doc.setDrawColor(200);
-  doc.setLineWidth(0.5);
-  doc.line(margin, qrY - 10, qrX - 12, qrY - 10);
+  // ── Footer: deposit notice anchored to bottom
+  const footerY = pageH - margin - 24;
   doc.setFont('helvetica', 'bolditalic');
   doc.setFontSize(10);
   doc.setTextColor(0);
-  doc.text('50% deposit required to start', margin, qrY + 20);
-  doc.text('Balance due on pickup', margin, qrY + 34);
+  doc.text('50% deposit required to start', margin, footerY);
+  doc.text('Balance due on pickup', margin, footerY + 14);
 
   return doc;
 }
