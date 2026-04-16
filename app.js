@@ -424,16 +424,8 @@ function generateBidPDF(data) {
     y += noteLines.length * 14;
   }
 
-  // ── Footer: deposit notice
-  y += 20;
-  divider();
-  y += 12;
-  doc.setFont('helvetica', 'bolditalic');
-  doc.setFontSize(10);
-  doc.text('50% deposit required to start — Balance due on pickup', pageW / 2, y, { align: 'center' });
-
   // ── QR Code at bottom-right
-  const qrSize = 80;
+  const qrSize = 90;
   const qrX = rightCol - qrSize;
   const qrY = pageH - margin - qrSize - 14;
 
@@ -448,6 +440,17 @@ function generateBidPDF(data) {
   doc.setTextColor(100);
   doc.text('Leave us a review!', qrX + qrSize / 2, qrY + qrSize + 12, { align: 'center' });
   doc.setTextColor(0);
+
+  // ── Footer: deposit notice (line stops before QR)
+  y += 20;
+  doc.setDrawColor(200);
+  doc.setLineWidth(0.5);
+  doc.line(margin, qrY - 10, qrX - 12, qrY - 10);
+  doc.setFont('helvetica', 'bolditalic');
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.text('50% deposit required to start', margin, qrY + 20);
+  doc.text('Balance due on pickup', margin, qrY + 34);
 
   return doc;
 }
