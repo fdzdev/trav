@@ -432,9 +432,9 @@ function generateBidPDF(data) {
   doc.setFontSize(10);
   doc.text('50% deposit required to start — Balance due on pickup', pageW / 2, y, { align: 'center' });
 
-  // ── QR Code at bottom-left
-  const qrSize = 90;
-  const qrX = margin;
+  // ── QR Code at bottom-right
+  const qrSize = 80;
+  const qrX = rightCol - qrSize;
   const qrY = pageH - margin - qrSize - 14;
 
   if (typeof QR_BASE64 !== 'undefined' && QR_BASE64) {
