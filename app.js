@@ -9,8 +9,20 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
+// ─── Form Type Switching ──────────────────────────────────────────
+document.querySelectorAll('.form-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.form-type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const formId = btn.dataset.form === 'bid' ? 'bid-form' : 'order-form';
+    document.getElementById(formId).classList.add('active');
+  });
+});
+
 // ─── Set today's date ──────────────────────────────────────────────
 document.getElementById('field-date').valueAsDate = new Date();
+document.getElementById('bid-date').valueAsDate = new Date();
 
 // ─── Get jsPDF safely ──────────────────────────────────────────────
 function getJsPDF() {
@@ -18,8 +30,15 @@ function getJsPDF() {
   return null;
 }
 
-// ─── Collect Form Data ─────────────────────────────────────────────
-function collectFormData() {
+// ─── Which form is active? ─────────────────────────────────────────
+function activeFormType() {
+  return document.querySelector('.form-type-btn.active').dataset.form;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MANUFACTURING TEMPLATE — collect + PDF
+// ═══════════════════════════════════════════════════════════════════
+function collectMfgData() {
   const form = document.getElementById('order-form');
   const fd = new FormData(form);
   const data = {};
@@ -63,8 +82,7 @@ function collectFormData() {
   return data;
 }
 
-// ─── Generate PDF ──────────────────────────────────────────────────
-function generatePDF(data) {
+function generateMfgPDF(data) {
   const PDF = getJsPDF();
   if (!PDF) return null;
 
@@ -94,7 +112,7 @@ function generatePDF(data) {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.text('Tarp Order Form', pageW / 2, y, { align: 'center' });
+  doc.text('Manufacturing Template', pageW / 2, y, { align: 'center' });
   y += 30;
 
   const col2 = pageW / 2 + 20;
@@ -149,7 +167,6 @@ function generatePDF(data) {
       if (e === 'Misc' && data.misc_detail) return e + ': ' + data.misc_detail;
       return e;
     });
-
     const colItems = Math.ceil(extrasWithDetails.length / 2);
     for (let i = 0; i < colItems; i++) {
       doc.text('•  ' + extrasWithDetails[i], margin + 4, y);
@@ -186,78 +203,294 @@ function generatePDF(data) {
   return doc;
 }
 
-// ─── Helper: build PDF blob + filename ─────────────────────────────
-function buildPDF() {
-  const data = collectFormData();
-  if (!data.customer) {
-    showToast('Please enter a customer name');
-    return null;
-  }
-  if (!getJsPDF()) {
-    showToast('PDF library not loaded — please refresh the page');
-    return null;
-  }
-  const doc = generatePDF(data);
-  if (!doc) {
-    showToast('Error generating PDF');
-    return null;
-  }
-  const filename = buildFilename(data);
-  return { doc, data, filename };
+// ═══════════════════════════════════════════════════════════════════
+// BID ESTIMATE — collect + PDF
+// ═══════════════════════════════════════════════════════════════════
+function collectBidData() {
+  const form = document.getElementById('bid-form');
+  const fd = new FormData(form);
+  const g = name => fd.get(name) || '';
+  return {
+    customer: g('bid_customer'),
+    phone: g('bid_phone'),
+    date: g('bid_date'),
+    price_4500: g('bid_4500'),
+    price_install: g('bid_install'),
+    tarp_size: g('bid_tarp_size'),
+    front_cap: g('bid_front_cap'), front_cap_price: g('bid_front_cap_price'),
+    trinity_cap: g('bid_trinity_cap'), trinity_cap_price: g('bid_trinity_cap_price'),
+    rear_cap: g('bid_rear_cap'), rear_cap_price: g('bid_rear_cap_price'),
+    swing_gate: g('bid_swing_gate'), swing_gate_price: g('bid_swing_gate_price'),
+    remote: g('bid_remote'), remote_price: g('bid_remote_price'),
+    bows_qty: g('bid_bows_qty'), bows_price: g('bid_bows_price'),
+    latch_qty: g('bid_latch_qty'), latch_price: g('bid_latch_price'),
+    tstop_qty: g('bid_tstop_qty'), tstop_price: g('bid_tstop_price'),
+    tstop6_qty: g('bid_tstop6_qty'), tstop6_price: g('bid_tstop6_price'),
+    pipe2_qty: g('bid_2pipe_qty'), pipe2_price: g('bid_2pipe_price'),
+    pipe3_qty: g('bid_3pipe_qty'), pipe3_price: g('bid_3pipe_price'),
+    pipe1_qty: g('bid_1pipe_qty'), pipe1_price: g('bid_1pipe_price'),
+    tarp_style: g('bid_tarp_style'),
+    tarp_style_other: g('bid_tarp_style_other'),
+    color: g('bid_color'),
+    oz18: g('bid_18oz'),
+    oz22: g('bid_22oz'),
+    width: g('bid_width'),
+    bow_reinf: g('bid_bow_reinf'), bow_reinf_price: g('bid_bow_reinf_price'),
+    side_reinf: g('bid_side_reinf'), side_reinf_price: g('bid_side_reinf_price'),
+    notes: g('bid_notes'),
+  };
 }
 
-// ─── Save PDF (download) ──────────────────────────────────────────
-document.getElementById('btn-save-pdf').addEventListener('click', () => {
-  const result = buildPDF();
-  if (!result) return;
+function generateBidPDF(data) {
+  const PDF = getJsPDF();
+  if (!PDF) return null;
 
-  result.doc.save(result.filename);
-  saveToHistory(result.data, result.filename);
+  const doc = new PDF('p', 'pt', 'letter');
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 40;
+  const rightCol = pageW - margin;
+  let y = 40;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.text('Bid Estimate', pageW / 2, y, { align: 'center' });
+  y += 30;
+
+  // Header
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Customer:', margin, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.customer, margin + 70, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Phone:', pageW / 2 + 20, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.phone, pageW / 2 + 70, y);
+  y += 18;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date:', margin, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(formatDate(data.date), margin + 70, y);
+  y += 24;
+
+  // Divider helper
+  function divider() {
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, rightCol, y);
+    y += 4;
+  }
+
+  // Section header helper
+  function sectionTitle(title) {
+    divider();
+    y += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(title, margin, y);
+    y += 16;
+    doc.setFontSize(10);
+  }
+
+  // Price line helper
+  function priceLine(label, price) {
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, margin + 8, y);
+    if (price) {
+      doc.text('$' + price, rightCol, y, { align: 'right' });
+    }
+    y += 16;
+  }
+
+  // YES/NO price line helper
+  function yesNoLine(label, val, price) {
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, margin + 8, y);
+    const choice = val || '—';
+    doc.text(choice, pageW / 2, y, { align: 'center' });
+    if (price && val === 'YES') {
+      doc.text('$' + price, rightCol, y, { align: 'right' });
+    }
+    y += 16;
+  }
+
+  // Qty price line helper
+  function qtyLine(label, qty, price) {
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, margin + 8, y);
+    if (qty) doc.text('x' + qty, pageW / 2 - 30, y, { align: 'right' });
+    if (price) doc.text('$' + price + ' ea', rightCol, y, { align: 'right' });
+    y += 16;
+  }
+
+  // ── Base Pricing
+  sectionTitle('Base Pricing');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Item', margin + 8, y);
+  doc.text('Cost', rightCol, y, { align: 'right' });
+  y += 14;
+  priceLine('Basic 4500 System', data.price_4500);
+  priceLine('Full Installation', data.price_install);
+
+  // ── Extras
+  sectionTitle("Extra's");
+  if (data.tarp_size) {
+    doc.setFont('helvetica', 'normal');
+    doc.text('Tarp Size: ' + data.tarp_size, margin + 8, y);
+    y += 16;
+  }
+  yesNoLine('Front End Cap', data.front_cap, data.front_cap_price);
+  yesNoLine('Trinity End Cap', data.trinity_cap, data.trinity_cap_price);
+  yesNoLine('Rear End Cap', data.rear_cap, data.rear_cap_price);
+  yesNoLine('Rear Swing Gate', data.swing_gate, data.swing_gate_price);
+  yesNoLine('Remote', data.remote, data.remote_price);
+
+  // ── Items
+  sectionTitle('Items');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Item', margin + 8, y);
+  doc.text('Qty', pageW / 2 - 30, y, { align: 'right' });
+  doc.text('Cost ea.', rightCol, y, { align: 'right' });
+  y += 14;
+  qtyLine('Bows', data.bows_qty, data.bows_price);
+  qtyLine('Latch Plate', data.latch_qty, data.latch_price);
+  qtyLine('Tarp Stops Regular', data.tstop_qty, data.tstop_price);
+  qtyLine('Tarp Stop 6"', data.tstop6_qty, data.tstop6_price);
+  qtyLine('2" Roll Pipe', data.pipe2_qty, data.pipe2_price);
+  qtyLine('3-1/4" Roll Pipe', data.pipe3_qty, data.pipe3_price);
+  qtyLine('1" Pipe', data.pipe1_qty, data.pipe1_price);
+
+  // ── Tarp Details
+  sectionTitle('Tarp Details');
+  let style = data.tarp_style || '—';
+  if (style === 'Other' && data.tarp_style_other) style = 'Other: ' + data.tarp_style_other;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Tarp Style: ' + style, margin + 8, y); y += 16;
+  doc.text('Color: ' + (data.color || '—'), margin + 8, y); y += 16;
+
+  const details = [
+    ['18 oz', data.oz18],
+    ['22 oz', data.oz22],
+    ['Width', data.width],
+  ];
+  details.forEach(([label, val]) => {
+    doc.text(label + ':', margin + 8, y);
+    doc.text(val || '—', margin + 140, y);
+    y += 16;
+  });
+
+  yesNoLine('Bow Reinforcements', data.bow_reinf, data.bow_reinf_price);
+  yesNoLine('Side Reinforcements', data.side_reinf, data.side_reinf_price);
+
+  // ── Notes
+  if (data.notes) {
+    sectionTitle('Notes');
+    doc.setFont('helvetica', 'normal');
+    const noteLines = doc.splitTextToSize(data.notes, pageW - margin * 2 - 16);
+    doc.text(noteLines, margin + 8, y);
+    y += noteLines.length * 14;
+  }
+
+  // ── Footer
+  y += 20;
+  divider();
+  y += 12;
+  doc.setFont('helvetica', 'bolditalic');
+  doc.setFontSize(10);
+  doc.text('50% deposit required to start — Balance due on pickup', pageW / 2, y, { align: 'center' });
+
+  return doc;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UNIFIED SAVE / SHARE
+// ═══════════════════════════════════════════════════════════════════
+function buildCurrentPDF() {
+  if (!getJsPDF()) {
+    showToast('PDF library not loaded — please refresh');
+    return null;
+  }
+
+  const type = activeFormType();
+  let data, doc, filename;
+
+  if (type === 'bid') {
+    data = collectBidData();
+    if (!data.customer) { showToast('Please enter a customer name'); return null; }
+    doc = generateBidPDF(data);
+    filename = buildFilename(data, 'BidEstimate');
+  } else {
+    data = collectMfgData();
+    if (!data.customer) { showToast('Please enter a customer name'); return null; }
+    doc = generateMfgPDF(data);
+    filename = buildFilename(data, 'TarpOrder');
+  }
+
+  if (!doc) { showToast('Error generating PDF'); return null; }
+  return { doc, data, filename, type };
+}
+
+// Manufacturing buttons
+document.getElementById('btn-save-pdf').addEventListener('click', () => {
+  const r = buildCurrentPDF();
+  if (!r) return;
+  r.doc.save(r.filename);
+  saveToHistory(r.data, r.filename, r.type);
   showToast('PDF saved!');
 });
 
-// ─── Share (native share sheet — works on iPad) ───────────────────
-document.getElementById('btn-share').addEventListener('click', async () => {
-  const result = buildPDF();
-  if (!result) return;
+document.getElementById('btn-share').addEventListener('click', () => sharePDF());
 
-  const blob = result.doc.output('blob');
-  const file = new File([blob], result.filename, { type: 'application/pdf' });
+// Bid buttons
+document.getElementById('btn-save-bid-pdf').addEventListener('click', () => {
+  const r = buildCurrentPDF();
+  if (!r) return;
+  r.doc.save(r.filename);
+  saveToHistory(r.data, r.filename, r.type);
+  showToast('PDF saved!');
+});
+
+document.getElementById('btn-share-bid').addEventListener('click', () => sharePDF());
+
+async function sharePDF() {
+  const r = buildCurrentPDF();
+  if (!r) return;
+
+  const blob = r.doc.output('blob');
+  const file = new File([blob], r.filename, { type: 'application/pdf' });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({
-        title: 'Tarp Order — ' + result.data.customer,
-        files: [file]
-      });
-      saveToHistory(result.data, result.filename);
+      await navigator.share({ title: r.filename.replace('.pdf', ''), files: [file] });
+      saveToHistory(r.data, r.filename, r.type);
       showToast('Shared!');
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        showToast('Share cancelled');
-      }
+      if (err.name !== 'AbortError') showToast('Share cancelled');
     }
   } else {
-    result.doc.save(result.filename);
-    saveToHistory(result.data, result.filename);
+    r.doc.save(r.filename);
+    saveToHistory(r.data, r.filename, r.type);
     showToast('PDF downloaded (share not supported on this browser)');
   }
-});
+}
 
-// ─── History ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════════
 function getHistory() {
   try { return JSON.parse(localStorage.getItem('trav_history') || '[]'); }
   catch { return []; }
 }
 
-function saveToHistory(data, filename) {
+function saveToHistory(data, filename, type) {
   const history = getHistory();
   history.unshift({
     id: Date.now(),
     timestamp: new Date().toISOString(),
     customer: data.customer,
-    invoice: data.invoice,
-    filename: filename,
+    invoice: data.invoice || '',
+    filename,
+    type: type || 'manufacturing',
     formData: data
   });
   localStorage.setItem('trav_history', JSON.stringify(history));
@@ -272,26 +505,31 @@ function renderHistory() {
     return;
   }
 
-  list.innerHTML = history.map(item => `
+  list.innerHTML = history.map(item => {
+    const typeLabel = item.type === 'bid' ? 'Bid Estimate' : 'Manufacturing';
+    return `
     <div class="history-card" data-id="${item.id}">
       <div class="history-info">
         <div class="history-customer">${esc(item.customer)}${item.invoice ? ' — #' + esc(item.invoice) : ''}</div>
-        <div class="history-meta">${formatTimestamp(item.timestamp)}</div>
+        <div class="history-meta">
+          <span class="history-type-badge ${item.type === 'bid' ? 'badge-bid' : 'badge-mfg'}">${typeLabel}</span>
+          ${formatTimestamp(item.timestamp)}
+        </div>
       </div>
       <div class="history-actions">
         <button class="btn btn-primary btn-sm" onclick="redownload('${item.id}')">PDF</button>
         <button class="btn btn-secondary btn-sm" onclick="loadOrder('${item.id}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteOrder('${item.id}')">Delete</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 window.redownload = function(id) {
   const item = getHistory().find(h => h.id === Number(id));
   if (!item) return;
   if (!getJsPDF()) { showToast('PDF library not loaded'); return; }
-  const doc = generatePDF(item.formData);
+  const doc = item.type === 'bid' ? generateBidPDF(item.formData) : generateMfgPDF(item.formData);
   if (doc) doc.save(item.filename);
   showToast('PDF downloaded');
 };
@@ -299,7 +537,17 @@ window.redownload = function(id) {
 window.loadOrder = function(id) {
   const item = getHistory().find(h => h.id === Number(id));
   if (!item) return;
-  populateForm(item.formData);
+
+  // Switch to correct form type
+  const targetBtn = document.querySelector(`.form-type-btn[data-form="${item.type === 'bid' ? 'bid' : 'manufacturing'}"]`);
+  if (targetBtn) targetBtn.click();
+
+  if (item.type === 'bid') {
+    populateBidForm(item.formData);
+  } else {
+    populateMfgForm(item.formData);
+  }
+
   document.querySelector('[data-tab="form"]').click();
   showToast('Order loaded');
 };
@@ -319,8 +567,10 @@ document.getElementById('btn-clear-history').addEventListener('click', () => {
   }
 });
 
-// ─── Populate Form ─────────────────────────────────────────────────
-function populateForm(data) {
+// ═══════════════════════════════════════════════════════════════════
+// POPULATE FORMS
+// ═══════════════════════════════════════════════════════════════════
+function populateMfgForm(data) {
   const form = document.getElementById('order-form');
   form.reset();
 
@@ -372,11 +622,72 @@ function populateForm(data) {
   }
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────
-function buildFilename(data) {
+function populateBidForm(data) {
+  const form = document.getElementById('bid-form');
+  form.reset();
+
+  const setText = (name, val) => {
+    const el = form.querySelector(`[name="${name}"]`);
+    if (el) el.value = val || '';
+  };
+
+  setText('bid_customer', data.customer);
+  setText('bid_phone', data.phone);
+  setText('bid_date', data.date);
+  setText('bid_4500', data.price_4500);
+  setText('bid_install', data.price_install);
+  setText('bid_tarp_size', data.tarp_size);
+  setText('bid_front_cap_price', data.front_cap_price);
+  setText('bid_trinity_cap_price', data.trinity_cap_price);
+  setText('bid_rear_cap_price', data.rear_cap_price);
+  setText('bid_swing_gate_price', data.swing_gate_price);
+  setText('bid_remote_price', data.remote_price);
+  setText('bid_bows_qty', data.bows_qty);
+  setText('bid_bows_price', data.bows_price);
+  setText('bid_latch_qty', data.latch_qty);
+  setText('bid_latch_price', data.latch_price);
+  setText('bid_tstop_qty', data.tstop_qty);
+  setText('bid_tstop_price', data.tstop_price);
+  setText('bid_tstop6_qty', data.tstop6_qty);
+  setText('bid_tstop6_price', data.tstop6_price);
+  setText('bid_2pipe_qty', data.pipe2_qty);
+  setText('bid_2pipe_price', data.pipe2_price);
+  setText('bid_3pipe_qty', data.pipe3_qty);
+  setText('bid_3pipe_price', data.pipe3_price);
+  setText('bid_1pipe_qty', data.pipe1_qty);
+  setText('bid_1pipe_price', data.pipe1_price);
+  setText('bid_tarp_style_other', data.tarp_style_other);
+  setText('bid_color', data.color);
+  setText('bid_bow_reinf_price', data.bow_reinf_price);
+  setText('bid_side_reinf_price', data.side_reinf_price);
+  setText('bid_notes', data.notes);
+
+  const setRadio = (name, val) => {
+    if (!val) return;
+    const radio = form.querySelector(`[name="${name}"][value="${val}"]`);
+    if (radio) radio.checked = true;
+  };
+
+  setRadio('bid_front_cap', data.front_cap);
+  setRadio('bid_trinity_cap', data.trinity_cap);
+  setRadio('bid_rear_cap', data.rear_cap);
+  setRadio('bid_swing_gate', data.swing_gate);
+  setRadio('bid_remote', data.remote);
+  setRadio('bid_tarp_style', data.tarp_style);
+  setRadio('bid_18oz', data.oz18);
+  setRadio('bid_22oz', data.oz22);
+  setRadio('bid_width', data.width);
+  setRadio('bid_bow_reinf', data.bow_reinf);
+  setRadio('bid_side_reinf', data.side_reinf);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function buildFilename(data, prefix) {
   const datePart = data.date || new Date().toISOString().slice(0, 10);
   const custPart = (data.customer || 'order').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
-  return `TarpOrder_${custPart}_${datePart}.pdf`;
+  return `${prefix}_${custPart}_${datePart}.pdf`;
 }
 
 function formatDate(dateStr) {

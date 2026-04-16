@@ -316,7 +316,31 @@ legend {
 .history-meta {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-top: 2px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.history-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-mfg {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-bid {
+  background: #e3f2fd;
+  color: #1565c0;
 }
 
 .history-actions {
@@ -354,6 +378,128 @@ legend {
   transform: translateX(-50%) translateY(10px);
   pointer-events: none;
 }
+
+/* Form Type Selector */
+.form-type-selector {
+  display: flex;
+  gap: 0;
+  background: #e5e5ea;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 20px;
+}
+
+.form-type-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.form-type-btn.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.form-panel { display: none; }
+.form-panel.active { display: block; }
+
+/* Bid Estimate Styles */
+.bid-line, .bid-yesno-line, .bid-qty-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f2;
+}
+
+.bid-line:last-child,
+.bid-yesno-line:last-child,
+.bid-qty-line:last-child {
+  border-bottom: none;
+}
+
+.bid-label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.bid-price {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.bid-price input {
+  width: 100% !important;
+  padding: 8px 8px !important;
+  font-size: 15px !important;
+  text-align: right;
+}
+
+.dollar {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.bid-ea {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.bid-qty {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.bid-qty input {
+  width: 100% !important;
+  padding: 8px 6px !important;
+  font-size: 14px !important;
+  text-align: center;
+}
+
+.bid-yesno-line .radio-group {
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.chip-sm {
+  padding: 5px 10px !important;
+  font-size: 13px !important;
+}
+
+.bid-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.btn-share {
+  background: var(--drive-blue);
+  color: white;
+}
+.btn-share:hover { background: #3367d6; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 0; }

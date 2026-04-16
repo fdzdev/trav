@@ -20,13 +20,21 @@
 
   <!-- Form Tab -->
   <div id="form-tab" class="tab-content active">
-    <form id="order-form">
-      <!-- Header -->
+
+    <!-- Form Type Selector -->
+    <div class="form-type-selector">
+      <button class="form-type-btn active" data-form="manufacturing">Manufacturing Template</button>
+      <button class="form-type-btn" data-form="bid">Bid Estimate</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MANUFACTURING TEMPLATE                                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <form id="order-form" class="form-panel active">
       <div class="form-header">
-        <h1>Tarp Order Form</h1>
+        <h1>Manufacturing Template</h1>
       </div>
 
-      <!-- Top Info -->
       <div class="form-row">
         <div class="field grow">
           <label>Date</label>
@@ -63,7 +71,6 @@
         </div>
       </div>
 
-      <!-- Tarp Style -->
       <fieldset>
         <legend>Tarp Style</legend>
         <div class="radio-group">
@@ -78,7 +85,6 @@
         </div>
       </fieldset>
 
-      <!-- Tarp Color -->
       <fieldset>
         <legend>Tarp Color</legend>
         <div class="radio-group">
@@ -94,7 +100,6 @@
         </div>
       </fieldset>
 
-      <!-- Material & Dimensions -->
       <fieldset>
         <legend>Material &amp; Dimensions</legend>
         <div class="two-col">
@@ -126,7 +131,6 @@
         </div>
       </fieldset>
 
-      <!-- Extra Items -->
       <fieldset>
         <legend>Extra Items</legend>
         <div class="two-col">
@@ -172,7 +176,6 @@
         </div>
       </fieldset>
 
-      <!-- Build Info -->
       <fieldset>
         <legend>Build Info</legend>
         <div class="form-row">
@@ -191,19 +194,242 @@
         </div>
       </fieldset>
 
-      <!-- Notes -->
       <fieldset>
         <legend>Notes</legend>
         <textarea name="notes" id="field-notes" rows="3" placeholder="Additional notes..."></textarea>
       </fieldset>
 
-      <!-- Actions -->
       <div class="actions">
         <button type="button" id="btn-save-pdf" class="btn btn-primary">Save PDF</button>
-        <button type="button" id="btn-share" class="btn btn-drive">Share</button>
+        <button type="button" id="btn-share" class="btn btn-share">Share</button>
         <button type="reset" class="btn btn-secondary">Clear Form</button>
       </div>
     </form>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- BID ESTIMATE                                               -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <form id="bid-form" class="form-panel">
+      <div class="form-header">
+        <h1>Bid Estimate</h1>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="form-row">
+        <div class="field grow">
+          <label>Customer</label>
+          <input type="text" name="bid_customer" id="bid-customer">
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" name="bid_phone" id="bid-phone">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field grow">
+          <label>Date</label>
+          <input type="date" name="bid_date" id="bid-date">
+        </div>
+      </div>
+
+      <!-- Base Pricing -->
+      <fieldset>
+        <legend>Base Pricing</legend>
+        <div class="bid-line">
+          <span class="bid-label">Basic 4500 System</span>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_4500" placeholder="3600"></div>
+        </div>
+        <div class="bid-line">
+          <span class="bid-label">Full Installation</span>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_install" placeholder="2500"></div>
+        </div>
+      </fieldset>
+
+      <!-- Extras YES/NO -->
+      <fieldset>
+        <legend>Extra's</legend>
+        <div class="field" style="margin-bottom:12px">
+          <label>Tarp Size</label>
+          <input type="text" name="bid_tarp_size" placeholder="e.g. 24ft">
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Front End Cap</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_front_cap" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_front_cap" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_front_cap_price" placeholder="400"></div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Trinity End Cap</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_trinity_cap" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_trinity_cap" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_trinity_cap_price" placeholder="600"></div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Rear End Cap</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_rear_cap" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_rear_cap" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_rear_cap_price" placeholder="400"></div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Rear Swing Gate</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_swing_gate" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_swing_gate" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_swing_gate_price" placeholder="900"></div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Remote</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_remote" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_remote" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_remote_price" placeholder="250"></div>
+        </div>
+      </fieldset>
+
+      <!-- Quantity Items -->
+      <fieldset>
+        <legend>Items</legend>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">Bows</span>
+          <div class="bid-qty"><input type="text" name="bid_bows_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_bows_price" placeholder="100"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">Latch Plate</span>
+          <div class="bid-qty"><input type="text" name="bid_latch_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_latch_price" placeholder="73.25"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">Tarp Stops Regular</span>
+          <div class="bid-qty"><input type="text" name="bid_tstop_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_tstop_price" placeholder="34.25"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">Tarp Stop 6"</span>
+          <div class="bid-qty"><input type="text" name="bid_tstop6_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_tstop6_price" placeholder="26.25"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">2" Roll Pipe</span>
+          <div class="bid-qty"><input type="text" name="bid_2pipe_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_2pipe_price" placeholder="150"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">3-1/4" Roll Pipe</span>
+          <div class="bid-qty"><input type="text" name="bid_3pipe_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_3pipe_price" placeholder="435"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-qty-line">
+          <span class="bid-label">1" Pipe</span>
+          <div class="bid-qty"><input type="text" name="bid_1pipe_qty" placeholder="Qty"></div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_1pipe_price" placeholder="90"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+      </fieldset>
+
+      <!-- Tarp Details -->
+      <fieldset>
+        <legend>Tarp Details</legend>
+        <div class="field" style="margin-bottom:12px">
+          <label>Tarp Style</label>
+          <div class="radio-group">
+            <label class="chip"><input type="radio" name="bid_tarp_style" value="Trinity"> Trinity</label>
+            <label class="chip other-chip">
+              <input type="radio" name="bid_tarp_style" value="Other"> Other
+              <input type="text" name="bid_tarp_style_other" class="inline-input" placeholder="specify">
+            </label>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label>Color</label>
+          <input type="text" name="bid_color" placeholder="e.g. Black">
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">18 oz</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_18oz" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_18oz" value="NO"> NO</label>
+          </div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">22 oz</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_22oz" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_22oz" value="NO"> NO</label>
+          </div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Width</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_width" value="96&quot;"> 96"</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_width" value="102&quot;"> 102"</label>
+          </div>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Bow Reinforcements</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_bow_reinf" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_bow_reinf" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_bow_reinf_price" placeholder="30"></div>
+          <span class="bid-ea">ea</span>
+        </div>
+
+        <div class="bid-yesno-line">
+          <span class="bid-label">Side Reinforcements</span>
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="radio" name="bid_side_reinf" value="YES"> YES</label>
+            <label class="chip chip-sm"><input type="radio" name="bid_side_reinf" value="NO"> NO</label>
+          </div>
+          <div class="bid-price"><span class="dollar">$</span><input type="text" name="bid_side_reinf_price" placeholder="80"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Notes</legend>
+        <textarea name="bid_notes" id="bid-notes" rows="4" placeholder="Additional notes..."></textarea>
+      </fieldset>
+
+      <div class="bid-footer">50% deposit required to start &mdash; Balance due on pickup</div>
+
+      <div class="actions">
+        <button type="button" id="btn-save-bid-pdf" class="btn btn-primary">Save PDF</button>
+        <button type="button" id="btn-share-bid" class="btn btn-share">Share</button>
+        <button type="reset" class="btn btn-secondary">Clear Form</button>
+      </div>
+    </form>
+
   </div>
 
   <!-- History Tab -->
