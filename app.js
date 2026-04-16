@@ -56,13 +56,13 @@ function collectMfgData() {
     data.tarp_style = 'Other: ' + data.tarp_style_other;
   }
 
-  data.tarp_color = fd.get('tarp_color') || '';
+  data.tarp_colors = fd.getAll('tarp_color');
   data.tarp_color_other = fd.get('tarp_color_other') || '';
-  if (data.tarp_color === 'Other' && data.tarp_color_other) {
-    data.tarp_color = 'Other: ' + data.tarp_color_other;
+  if (data.tarp_colors.includes('Other') && data.tarp_color_other) {
+    data.tarp_colors = data.tarp_colors.map(c => c === 'Other' ? 'Other: ' + data.tarp_color_other : c);
   }
 
-  data.material = fd.get('material') || '';
+  data.materials = fd.getAll('material');
   data.length = fd.get('length') || '';
   data.width = fd.get('width') || '';
   data.trailer_brand = fd.get('trailer_brand') || '';
@@ -136,14 +136,14 @@ function generateMfgPDF(data) {
   y = addSection('Tarp Color', y);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text(data.tarp_color || '—', margin + 4, y);
+  doc.text(data.tarp_colors.length ? data.tarp_colors.join(', ') : '—', margin + 4, y);
   y += 20;
 
   y = addSection('Material & Dimensions', y);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   const matLine = [
-    data.material,
+    data.materials.length ? data.materials.join(', ') : '',
     data.length ? 'Length: ' + data.length : '',
     data.width ? 'Width: ' + data.width : '',
     data.trailer_brand ? 'Trailer: ' + data.trailer_brand : ''
@@ -610,16 +610,25 @@ function populateMfgForm(data) {
   };
 
   setRadio('tarp_style', data.tarp_style);
-  setRadio('tarp_color', data.tarp_color);
-  setRadio('material', data.material);
   setRadio('width', data.width);
 
-  if (data.extras) {
-    data.extras.forEach(val => {
-      const cb = form.querySelector(`[name="extras"][value="${val}"]`);
+  const setChecks = (name, vals) => {
+    if (!vals) return;
+    vals.forEach(val => {
+      let cleanVal = val;
+      if (val.startsWith('Other: ')) {
+        cleanVal = 'Other';
+        const otherInput = form.querySelector(`[name="${name}_other"]`);
+        if (otherInput) otherInput.value = val.replace('Other: ', '');
+      }
+      const cb = form.querySelector(`[name="${name}"][value="${cleanVal}"]`);
       if (cb) cb.checked = true;
     });
-  }
+  };
+
+  setChecks('tarp_color', data.tarp_colors);
+  setChecks('material', data.materials);
+  setChecks('extras', data.extras);
 }
 
 function populateBidForm(data) {
