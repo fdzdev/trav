@@ -136,14 +136,16 @@ function generateMfgPDF(data) {
   y = addSection('Tarp Color', y);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text(data.tarp_colors.length ? data.tarp_colors.join(', ') : '—', margin + 4, y);
+  const colors = data.tarp_colors || (data.tarp_color ? [data.tarp_color] : []);
+  doc.text(colors.length ? colors.join(', ') : '—', margin + 4, y);
   y += 20;
 
   y = addSection('Material & Dimensions', y);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
+  const mats = data.materials || (data.material ? [data.material] : []);
   const matLine = [
-    data.materials.length ? data.materials.join(', ') : '',
+    mats.length ? mats.join(', ') : '',
     data.length ? 'Length: ' + data.length : '',
     data.width ? 'Width: ' + data.width : '',
     data.trailer_brand ? 'Trailer: ' + data.trailer_brand : ''
@@ -626,8 +628,8 @@ function populateMfgForm(data) {
     });
   };
 
-  setChecks('tarp_color', data.tarp_colors);
-  setChecks('material', data.materials);
+  setChecks('tarp_color', data.tarp_colors || (data.tarp_color ? [data.tarp_color] : []));
+  setChecks('material', data.materials || (data.material ? [data.material] : []));
   setChecks('extras', data.extras);
 }
 
