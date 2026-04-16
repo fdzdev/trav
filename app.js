@@ -258,7 +258,7 @@ function generateBidPDF(data) {
   // ── Logo + Company Info Header
   if (typeof LOGO_BASE64 !== 'undefined' && LOGO_BASE64) {
     try {
-      doc.addImage('data:image/png;base64,' + LOGO_BASE64, 'PNG', margin, y, 150, 50);
+      doc.addImage('data:image/png;base64,' + LOGO_BASE64, 'PNG', margin, y, 210, 70);
     } catch (e) { /* skip if image fails */ }
   }
 
@@ -266,11 +266,11 @@ function generateBidPDF(data) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100);
-  doc.text('974 ID-39, Blackfoot, ID 83221', infoX, y + 14, { align: 'right' });
-  doc.text('(208) 684-9333', infoX, y + 26, { align: 'right' });
+  doc.text('974 ID-39, Blackfoot, ID 83221', infoX, y + 28, { align: 'right' });
+  doc.text('(208) 684-9333', infoX, y + 42, { align: 'right' });
   doc.setTextColor(0);
 
-  y += 60;
+  y += 80;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
