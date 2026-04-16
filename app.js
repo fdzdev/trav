@@ -233,7 +233,8 @@ function collectBidData() {
     pipe1_qty: g('bid_1pipe_qty'), pipe1_price: g('bid_1pipe_price'),
     tarp_style: g('bid_tarp_style'),
     tarp_style_other: g('bid_tarp_style_other'),
-    color: g('bid_color'),
+    colors: fd.getAll('bid_color'),
+    color_other: g('bid_color_other'),
     oz18: g('bid_18oz'),
     oz22: g('bid_22oz'),
     width: g('bid_width'),
@@ -368,7 +369,11 @@ function generateBidPDF(data) {
   if (style === 'Other' && data.tarp_style_other) style = 'Other: ' + data.tarp_style_other;
   doc.setFont('helvetica', 'normal');
   doc.text('Tarp Style: ' + style, margin + 8, y); y += 16;
-  doc.text('Color: ' + (data.color || '—'), margin + 8, y); y += 16;
+  let bidColors = data.colors || (data.color ? [data.color] : []);
+  if (bidColors.includes('Other') && data.color_other) {
+    bidColors = bidColors.map(c => c === 'Other' ? 'Other: ' + data.color_other : c);
+  }
+  doc.text('Color: ' + (bidColors.length ? bidColors.join(', ') : '—'), margin + 8, y); y += 16;
 
   const details = [
     ['18 oz', data.oz18],
@@ -668,7 +673,17 @@ function populateBidForm(data) {
   setText('bid_1pipe_qty', data.pipe1_qty);
   setText('bid_1pipe_price', data.pipe1_price);
   setText('bid_tarp_style_other', data.tarp_style_other);
-  setText('bid_color', data.color);
+  const bidColors = data.colors || (data.color ? [data.color] : []);
+  bidColors.forEach(val => {
+    let cleanVal = val;
+    if (val.startsWith('Other: ')) {
+      cleanVal = 'Other';
+      const oi = form.querySelector('[name="bid_color_other"]');
+      if (oi) oi.value = val.replace('Other: ', '');
+    }
+    const cb = form.querySelector(`[name="bid_color"][value="${cleanVal}"]`);
+    if (cb) cb.checked = true;
+  });
   setText('bid_bow_reinf_price', data.bow_reinf_price);
   setText('bid_side_reinf_price', data.side_reinf_price);
   setText('bid_notes', data.notes);

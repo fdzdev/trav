@@ -369,7 +369,17 @@
 
         <div class="field" style="margin-bottom:12px">
           <label>Color</label>
-          <input type="text" name="bid_color" placeholder="e.g. Black">
+          <div class="radio-group">
+            <label class="chip chip-sm"><input type="checkbox" name="bid_color" value="Black"> Black</label>
+            <label class="chip chip-sm"><input type="checkbox" name="bid_color" value="Red"> Red</label>
+            <label class="chip chip-sm"><input type="checkbox" name="bid_color" value="White"> White</label>
+            <label class="chip chip-sm"><input type="checkbox" name="bid_color" value="Blue"> Blue</label>
+            <label class="chip chip-sm"><input type="checkbox" name="bid_color" value="Grey"> Grey</label>
+            <label class="chip chip-sm other-chip">
+              <input type="checkbox" name="bid_color" value="Other"> Other
+              <input type="text" name="bid_color_other" class="inline-input" placeholder="specify">
+            </label>
+          </div>
         </div>
 
         <div class="bid-yesno-line">
