@@ -275,7 +275,7 @@ function generateBidPDF(data) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
   doc.text('Bid Estimate', pageW / 2, y, { align: 'center' });
-  y += 28;
+  y += 6;
 
   // ── Thin accent line under title
   doc.setDrawColor(230, 165, 0);
@@ -337,7 +337,7 @@ function generateBidPDF(data) {
     doc.text(label, margin + 8, y);
     const choice = val || '—';
     doc.text(choice, pageW / 2, y, { align: 'center' });
-    if (price && val === 'YES') {
+    if (price) {
       doc.text('$' + price, rightCol, y, { align: 'right' });
     }
     y += 16;
@@ -479,6 +479,28 @@ function buildCurrentPDF() {
   if (!doc) { showToast('Error generating PDF'); return null; }
   return { doc, data, filename, type };
 }
+
+// ─── Preview ──────────────────────────────────────────────────────
+function previewPDF() {
+  const r = buildCurrentPDF();
+  if (!r) return;
+
+  const blob = r.doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  const iframe = document.getElementById('preview-iframe');
+  iframe.src = url;
+  document.getElementById('preview-modal').classList.remove('hidden');
+}
+
+document.getElementById('btn-preview').addEventListener('click', previewPDF);
+document.getElementById('btn-preview-bid').addEventListener('click', previewPDF);
+
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('preview-modal').classList.add('hidden');
+  const iframe = document.getElementById('preview-iframe');
+  URL.revokeObjectURL(iframe.src);
+  iframe.src = '';
+});
 
 // Manufacturing buttons
 document.getElementById('btn-save-pdf').addEventListener('click', () => {

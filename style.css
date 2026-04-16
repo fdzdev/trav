@@ -501,6 +501,58 @@ legend {
 }
 .btn-share:hover { background: #3367d6; }
 
+/* Preview Button */
+.btn-preview {
+  background: #34c759;
+  color: white;
+}
+.btn-preview:hover { background: #2da44e; }
+
+/* Preview Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+  background: var(--card);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+#preview-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 0; }
 

@@ -201,6 +201,7 @@
       </fieldset>
 
       <div class="actions">
+        <button type="button" id="btn-preview" class="btn btn-preview">Preview PDF</button>
         <button type="button" id="btn-save-pdf" class="btn btn-primary">Save PDF</button>
         <button type="button" id="btn-share" class="btn btn-share">Share</button>
         <button type="reset" class="btn btn-secondary">Clear Form</button>
@@ -435,6 +436,7 @@
       <div class="bid-footer">50% deposit required to start &mdash; Balance due on pickup</div>
 
       <div class="actions">
+        <button type="button" id="btn-preview-bid" class="btn btn-preview">Preview PDF</button>
         <button type="button" id="btn-save-bid-pdf" class="btn btn-primary">Save PDF</button>
         <button type="button" id="btn-share-bid" class="btn btn-share">Share</button>
         <button type="reset" class="btn btn-secondary">Clear Form</button>
@@ -452,6 +454,17 @@
     <div id="history-list" class="history-list">
       <p class="empty-state">No orders yet.</p>
     </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>PDF Preview</h2>
+      <button id="modal-close" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+    <iframe id="preview-iframe"></iframe>
   </div>
 </div>
 
