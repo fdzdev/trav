@@ -24,8 +24,9 @@
 
     <!-- Form Type Selector -->
     <div class="form-type-selector">
-      <button class="form-type-btn active" data-form="manufacturing">Manufacturing Template</button>
+      <button class="form-type-btn active" data-form="manufacturing">Manufacturing</button>
       <button class="form-type-btn" data-form="bid">Bid Estimate</button>
+      <button class="form-type-btn" data-form="draw">Drawing Pad</button>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
@@ -442,6 +443,53 @@
         <button type="reset" class="btn btn-secondary">Clear Form</button>
       </div>
     </form>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- DRAWING PAD                                                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="draw-form" class="form-panel">
+      <div class="form-header">
+        <h1>Drawing Pad</h1>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>Title</label>
+          <input type="text" id="draw-title" placeholder="e.g. Sketch for customer X">
+        </div>
+      </div>
+
+      <!-- Drawing Tools -->
+      <div class="draw-toolbar">
+        <div class="draw-colors">
+          <button class="color-btn active" data-color="#000000" style="background:#000000"></button>
+          <button class="color-btn" data-color="#ff3b30" style="background:#ff3b30"></button>
+          <button class="color-btn" data-color="#007aff" style="background:#007aff"></button>
+          <button class="color-btn" data-color="#34c759" style="background:#34c759"></button>
+          <button class="color-btn" data-color="#ff9500" style="background:#ff9500"></button>
+        </div>
+        <div class="draw-sizes">
+          <button class="size-btn" data-size="2">S</button>
+          <button class="size-btn active" data-size="4">M</button>
+          <button class="size-btn" data-size="8">L</button>
+          <button class="size-btn" data-size="16">XL</button>
+        </div>
+        <button id="btn-eraser" class="btn btn-secondary btn-sm">Eraser</button>
+        <button id="btn-undo" class="btn btn-secondary btn-sm">Undo</button>
+        <button id="btn-clear-canvas" class="btn btn-secondary btn-sm">Clear</button>
+      </div>
+
+      <!-- Canvas -->
+      <div class="canvas-wrapper">
+        <canvas id="draw-canvas"></canvas>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="btn-preview-draw" class="btn btn-preview">Preview PDF</button>
+        <button type="button" id="btn-save-draw-pdf" class="btn btn-primary">Save PDF</button>
+        <button type="button" id="btn-share-draw" class="btn btn-share">Share</button>
+      </div>
+    </div>
 
   </div>
 

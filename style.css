@@ -343,6 +343,16 @@ legend {
   color: #1565c0;
 }
 
+.badge-draw {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.btn-active-tool {
+  background: var(--primary) !important;
+  color: white !important;
+}
+
 .history-actions {
   display: flex;
   gap: 8px;
@@ -500,6 +510,77 @@ legend {
   color: white;
 }
 .btn-share:hover { background: #3367d6; }
+
+/* Drawing Pad */
+.draw-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.draw-colors {
+  display: flex;
+  gap: 6px;
+}
+
+.color-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.color-btn.active {
+  border-color: var(--primary);
+  transform: scale(1.15);
+}
+
+.draw-sizes {
+  display: flex;
+  gap: 4px;
+}
+
+.size-btn {
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.size-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.canvas-wrapper {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: white;
+  touch-action: none;
+  margin-bottom: 16px;
+}
+
+#draw-canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
 
 /* Preview Button */
 .btn-preview {

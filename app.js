@@ -10,13 +10,14 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 // ─── Form Type Switching ──────────────────────────────────────────
+const formMap = { manufacturing: 'order-form', bid: 'bid-form', draw: 'draw-form' };
 document.querySelectorAll('.form-type-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.form-type-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    const formId = btn.dataset.form === 'bid' ? 'bid-form' : 'order-form';
-    document.getElementById(formId).classList.add('active');
+    document.getElementById(formMap[btn.dataset.form]).classList.add('active');
+    if (btn.dataset.form === 'draw') resizeCanvas();
   });
 });
 
@@ -465,7 +466,13 @@ function buildCurrentPDF() {
   const type = activeFormType();
   let data, doc, filename;
 
-  if (type === 'bid') {
+  if (type === 'draw') {
+    const r = generateDrawPDF();
+    if (!r) return null;
+    data = { customer: r.title };
+    doc = r.doc;
+    filename = 'Drawing_' + (r.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)) + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+  } else if (type === 'bid') {
     data = collectBidData();
     if (!data.customer) { showToast('Please enter a customer name'); return null; }
     doc = generateBidPDF(data);
@@ -579,13 +586,14 @@ function renderHistory() {
   }
 
   list.innerHTML = history.map(item => {
-    const typeLabel = item.type === 'bid' ? 'Bid Estimate' : 'Manufacturing';
+    const typeLabel = item.type === 'bid' ? 'Bid Estimate' : item.type === 'draw' ? 'Drawing' : 'Manufacturing';
+    const badgeClass = item.type === 'bid' ? 'badge-bid' : item.type === 'draw' ? 'badge-draw' : 'badge-mfg';
     return `
     <div class="history-card" data-id="${item.id}">
       <div class="history-info">
         <div class="history-customer">${esc(item.customer)}${item.invoice ? ' — #' + esc(item.invoice) : ''}</div>
         <div class="history-meta">
-          <span class="history-type-badge ${item.type === 'bid' ? 'badge-bid' : 'badge-mfg'}">${typeLabel}</span>
+          <span class="history-type-badge ${badgeClass}">${typeLabel}</span>
           ${formatTimestamp(item.timestamp)}
         </div>
       </div>
@@ -602,6 +610,10 @@ window.redownload = function(id) {
   const item = getHistory().find(h => h.id === Number(id));
   if (!item) return;
   if (!getJsPDF()) { showToast('PDF library not loaded'); return; }
+  if (item.type === 'draw') {
+    showToast('Drawing PDFs cannot be re-generated from history');
+    return;
+  }
   const doc = item.type === 'bid' ? generateBidPDF(item.formData) : generateMfgPDF(item.formData);
   if (doc) doc.save(item.filename);
   showToast('PDF downloaded');
@@ -807,3 +819,238 @@ function showToast(msg) {
   clearTimeout(t._timeout);
   t._timeout = setTimeout(() => t.classList.add('hidden'), 2500);
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// DRAWING PAD
+// ═══════════════════════════════════════════════════════════════════
+const canvas = document.getElementById('draw-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let drawColor = '#000000';
+let drawSize = 4;
+let isEraser = false;
+let strokes = [];
+let currentStroke = null;
+
+function resizeCanvas() {
+  const wrapper = canvas.parentElement;
+  const w = wrapper.clientWidth;
+  const h = Math.round(w * 0.75);
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = w * ratio;
+  canvas.height = h * ratio;
+  canvas.style.height = h + 'px';
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  redrawStrokes();
+}
+
+function redrawStrokes() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  strokes.forEach(s => {
+    ctx.beginPath();
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = s.size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = s.eraser ? 'destination-out' : 'source-over';
+    s.points.forEach((pt, i) => {
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    });
+    ctx.stroke();
+  });
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  return {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top
+  };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  drawing = true;
+  const pt = getPos(e);
+  currentStroke = {
+    color: isEraser ? '#000000' : drawColor,
+    size: isEraser ? drawSize * 4 : drawSize,
+    eraser: isEraser,
+    points: [pt]
+  };
+}
+
+function moveDraw(e) {
+  if (!drawing || !currentStroke) return;
+  e.preventDefault();
+  const pt = getPos(e);
+  currentStroke.points.push(pt);
+
+  ctx.beginPath();
+  ctx.strokeStyle = currentStroke.color;
+  ctx.lineWidth = currentStroke.size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.globalCompositeOperation = currentStroke.eraser ? 'destination-out' : 'source-over';
+  const pts = currentStroke.points;
+  if (pts.length >= 2) {
+    ctx.moveTo(pts[pts.length - 2].x, pts[pts.length - 2].y);
+    ctx.lineTo(pt.x, pt.y);
+  }
+  ctx.stroke();
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function endDraw() {
+  if (!drawing || !currentStroke) return;
+  drawing = false;
+  if (currentStroke.points.length > 0) {
+    strokes.push(currentStroke);
+  }
+  currentStroke = null;
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', moveDraw);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', moveDraw, { passive: false });
+canvas.addEventListener('touchend', endDraw);
+canvas.addEventListener('touchcancel', endDraw);
+
+// Color buttons
+document.querySelectorAll('.color-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    drawColor = btn.dataset.color;
+    isEraser = false;
+    document.getElementById('btn-eraser').classList.remove('btn-active-tool');
+  });
+});
+
+// Size buttons
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    drawSize = Number(btn.dataset.size);
+  });
+});
+
+// Eraser
+document.getElementById('btn-eraser').addEventListener('click', () => {
+  isEraser = !isEraser;
+  document.getElementById('btn-eraser').classList.toggle('btn-active-tool', isEraser);
+  if (isEraser) {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  }
+});
+
+// Undo
+document.getElementById('btn-undo').addEventListener('click', () => {
+  strokes.pop();
+  redrawStrokes();
+});
+
+// Clear
+document.getElementById('btn-clear-canvas').addEventListener('click', () => {
+  strokes = [];
+  redrawStrokes();
+});
+
+// Resize on window resize
+window.addEventListener('resize', () => {
+  if (document.getElementById('draw-form').classList.contains('active')) resizeCanvas();
+});
+
+// Initial size
+setTimeout(resizeCanvas, 100);
+
+// ─── Drawing Pad PDF ──────────────────────────────────────────────
+function generateDrawPDF() {
+  const PDF = getJsPDF();
+  if (!PDF) return null;
+
+  const title = document.getElementById('draw-title').value || 'Drawing';
+  const doc = new PDF('l', 'pt', 'letter');
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 30;
+
+  // Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text(title, margin, margin + 10);
+
+  // Timestamp
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(new Date().toLocaleString(), pageW - margin, margin + 10, { align: 'right' });
+  doc.setTextColor(0);
+
+  // Canvas image
+  const imgData = canvas.toDataURL('image/png');
+  const canvasAspect = canvas.width / canvas.height;
+  const maxW = pageW - margin * 2;
+  const maxH = pageH - margin * 2 - 30;
+  let imgW = maxW;
+  let imgH = imgW / canvasAspect;
+  if (imgH > maxH) {
+    imgH = maxH;
+    imgW = imgH * canvasAspect;
+  }
+  const imgX = margin + (maxW - imgW) / 2;
+
+  doc.addImage(imgData, 'PNG', imgX, margin + 24, imgW, imgH);
+
+  return { doc, title };
+}
+
+// Save
+document.getElementById('btn-save-draw-pdf').addEventListener('click', () => {
+  const r = generateDrawPDF();
+  if (!r) return;
+  const filename = 'Drawing_' + (r.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)) + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+  r.doc.save(filename);
+  saveToHistory({ customer: r.title }, filename, 'draw');
+  showToast('PDF saved!');
+});
+
+// Share
+document.getElementById('btn-share-draw').addEventListener('click', async () => {
+  const r = generateDrawPDF();
+  if (!r) return;
+  const filename = 'Drawing_' + (r.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)) + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+  const blob = r.doc.output('blob');
+  const file = new File([blob], filename, { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title: r.title, files: [file] });
+      saveToHistory({ customer: r.title }, filename, 'draw');
+      showToast('Shared!');
+    } catch (err) {
+      if (err.name !== 'AbortError') showToast('Share cancelled');
+    }
+  } else {
+    r.doc.save(filename);
+    saveToHistory({ customer: r.title }, filename, 'draw');
+    showToast('PDF downloaded');
+  }
+});
+
+// Preview
+document.getElementById('btn-preview-draw').addEventListener('click', () => {
+  const r = generateDrawPDF();
+  if (!r) return;
+  const blob = r.doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  document.getElementById('preview-iframe').src = url;
+  document.getElementById('preview-modal').classList.remove('hidden');
+});
